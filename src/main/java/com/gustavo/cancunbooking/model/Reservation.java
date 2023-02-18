@@ -21,7 +21,7 @@ public class Reservation {
     private LocalDate startDate;
 
     @Column(name = "END_DATE", nullable = false)
-    private LocalDate Date;
+    private LocalDate endDate;
 
     @ManyToOne
     @JoinColumn(name = "USER_ID", nullable = false)
@@ -30,4 +30,8 @@ public class Reservation {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROOM_ID", nullable = false)
     private Room room;
+
+    @Column(name = "STATUS", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ReservationStatusEnum status;
 }

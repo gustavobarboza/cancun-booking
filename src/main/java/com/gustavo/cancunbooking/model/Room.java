@@ -15,5 +15,5 @@ public class Room {
     private Long id;
 
     @Column(name = "NUMBER", unique = true, nullable = false)
-    private Long number;
+    private Integer number;
 }
