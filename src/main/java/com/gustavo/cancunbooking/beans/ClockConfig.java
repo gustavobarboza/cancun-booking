@@ -1,4 +1,4 @@
-package com.gustavo.cancunbooking.bean;
+package com.gustavo.cancunbooking.beans;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,6 +1,6 @@
-package com.gustavo.cancunbooking.service;
+package com.gustavo.cancunbooking.services;
 
-import com.gustavo.cancunbooking.controller.response.RoomAvailabilityResponseDTO;
+import com.gustavo.cancunbooking.controllers.response.RoomAvailabilityResponseDTO;
 
 import java.time.LocalDate;
 

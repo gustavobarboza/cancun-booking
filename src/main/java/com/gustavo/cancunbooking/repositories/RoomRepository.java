@@ -1,4 +1,4 @@
-package com.gustavo.cancunbooking.repository;
+package com.gustavo.cancunbooking.repositories;
 
 import com.gustavo.cancunbooking.model.Room;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,9 +1,9 @@
-package com.gustavo.cancunbooking.service;
+package com.gustavo.cancunbooking.services;
 
-import com.gustavo.cancunbooking.controller.response.RoomAvailabilityResponseDTO;
+import com.gustavo.cancunbooking.controllers.response.RoomAvailabilityResponseDTO;
 import com.gustavo.cancunbooking.model.Reservation;
 import com.gustavo.cancunbooking.model.ReservationStatusEnum;
-import com.gustavo.cancunbooking.repository.ReservationRepository;
+import com.gustavo.cancunbooking.repositories.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +28,7 @@ public class RoomAvailabilityServiceImpl implements RoomAvailabilityService {
             Reservation reservation = reservationOptional.get();
             return getRoomAvailability(startDate, reservation);
         } else {
+            // If there were more rooms, would need a check to see if the room exists.
             return new RoomAvailabilityResponseDTO(true, LocalDate.now().plusDays(1));
         }
     }

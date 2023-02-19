@@ -1,4 +1,4 @@
-package com.gustavo.cancunbooking.controller.response;
+package com.gustavo.cancunbooking.controllers.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

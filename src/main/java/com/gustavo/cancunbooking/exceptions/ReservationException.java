@@ -1,4 +1,4 @@
-package com.gustavo.cancunbooking.exception;
+package com.gustavo.cancunbooking.exceptions;
 
 public class ReservationException extends RuntimeException {
 

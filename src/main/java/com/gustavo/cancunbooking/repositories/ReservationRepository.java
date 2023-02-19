@@ -1,4 +1,4 @@
-package com.gustavo.cancunbooking.repository;
+package com.gustavo.cancunbooking.repositories;
 
 import com.gustavo.cancunbooking.model.Reservation;
 import com.gustavo.cancunbooking.model.ReservationStatusEnum;

@@ -1,8 +1,8 @@
-package com.gustavo.cancunbooking.service;
+package com.gustavo.cancunbooking.services;
 
 import com.gustavo.cancunbooking.model.Reservation;
 import com.gustavo.cancunbooking.model.ReservationStatusEnum;
-import com.gustavo.cancunbooking.repository.ReservationRepository;
+import com.gustavo.cancunbooking.repositories.ReservationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

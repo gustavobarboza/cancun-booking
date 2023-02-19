@@ -1,14 +1,14 @@
-package com.gustavo.cancunbooking.service;
+package com.gustavo.cancunbooking.services;
 
-import com.gustavo.cancunbooking.controller.request.ReservationRequestDTO;
-import com.gustavo.cancunbooking.controller.request.ReservationUpdateRequestDTO;
-import com.gustavo.cancunbooking.controller.response.ReservationSuccessResponseDTO;
-import com.gustavo.cancunbooking.exception.*;
+import com.gustavo.cancunbooking.controllers.request.ReservationRequestDTO;
+import com.gustavo.cancunbooking.controllers.request.ReservationUpdateRequestDTO;
+import com.gustavo.cancunbooking.controllers.response.ReservationSuccessResponseDTO;
+import com.gustavo.cancunbooking.exceptions.*;
 import com.gustavo.cancunbooking.model.Reservation;
 import com.gustavo.cancunbooking.model.ReservationStatusEnum;
-import com.gustavo.cancunbooking.repository.ReservationRepository;
-import com.gustavo.cancunbooking.repository.RoomRepository;
-import com.gustavo.cancunbooking.repository.UserRepository;
+import com.gustavo.cancunbooking.repositories.ReservationRepository;
+import com.gustavo.cancunbooking.repositories.RoomRepository;
+import com.gustavo.cancunbooking.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

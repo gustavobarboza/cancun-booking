@@ -1,7 +1,6 @@
 package com.gustavo.cancunbooking.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 

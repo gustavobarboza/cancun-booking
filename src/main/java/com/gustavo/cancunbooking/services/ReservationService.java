@@ -1,11 +1,8 @@
-package com.gustavo.cancunbooking.service;
+package com.gustavo.cancunbooking.services;
 
-import com.gustavo.cancunbooking.controller.request.ReservationRequestDTO;
-import com.gustavo.cancunbooking.controller.request.ReservationUpdateRequestDTO;
-import com.gustavo.cancunbooking.controller.response.ReservationSuccessResponseDTO;
-import jakarta.transaction.Transactional;
-
-import java.time.LocalDate;
+import com.gustavo.cancunbooking.controllers.request.ReservationRequestDTO;
+import com.gustavo.cancunbooking.controllers.request.ReservationUpdateRequestDTO;
+import com.gustavo.cancunbooking.controllers.response.ReservationSuccessResponseDTO;
 
 // TODO move DTOs to another layer so the service layer doesn't know about the controller layer
 public interface ReservationService {
