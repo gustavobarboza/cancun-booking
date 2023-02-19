@@ -1,9 +1,11 @@
 package com.gustavo.cancunbooking.services;
 
 import com.gustavo.cancunbooking.controllers.response.RoomAvailabilityResponseDTO;
+import com.gustavo.cancunbooking.exceptions.ReservationException;
 import com.gustavo.cancunbooking.model.Reservation;
 import com.gustavo.cancunbooking.model.ReservationStatusEnum;
 import com.gustavo.cancunbooking.repositories.ReservationRepository;
+import com.gustavo.cancunbooking.repositories.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +15,12 @@ import java.util.Optional;
 @Service
 public class RoomAvailabilityServiceImpl implements RoomAvailabilityService {
     private final ReservationRepository reservationRepository;
+    private final RoomRepository roomRepository;
 
     @Autowired
-    public RoomAvailabilityServiceImpl(ReservationRepository reservationRepository) {
+    public RoomAvailabilityServiceImpl(ReservationRepository reservationRepository, RoomRepository roomRepository) {
         this.reservationRepository = reservationRepository;
+        this.roomRepository = roomRepository;
     }
 
     @Override
@@ -28,7 +32,10 @@ public class RoomAvailabilityServiceImpl implements RoomAvailabilityService {
             Reservation reservation = reservationOptional.get();
             return getRoomAvailability(startDate, reservation);
         } else {
-            // If there were more rooms, would need a check to see if the room exists.
+            if (!roomRepository.existsById(roomId)){
+                throw new ReservationException("No room found with the provided id");
+            }
+
             return new RoomAvailabilityResponseDTO(true, LocalDate.now().plusDays(1));
         }
     }

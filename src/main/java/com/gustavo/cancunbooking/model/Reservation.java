@@ -23,7 +23,7 @@ public class Reservation {
     @Column(name = "END_DATE", nullable = false)
     private LocalDate endDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 

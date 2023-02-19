@@ -6,6 +6,8 @@ import com.gustavo.cancunbooking.controllers.response.ReservationSuccessResponse
 import com.gustavo.cancunbooking.exceptions.*;
 import com.gustavo.cancunbooking.model.Reservation;
 import com.gustavo.cancunbooking.model.ReservationStatusEnum;
+import com.gustavo.cancunbooking.model.Room;
+import com.gustavo.cancunbooking.model.User;
 import com.gustavo.cancunbooking.repositories.ReservationRepository;
 import com.gustavo.cancunbooking.repositories.RoomRepository;
 import com.gustavo.cancunbooking.repositories.UserRepository;
@@ -22,6 +24,7 @@ import java.util.Optional;
 public class ReservationServiceImpl implements ReservationService {
 
     public static final int MAXIMUM_RESERVATION_DAS_ALLOWED = 3;
+    public static final int MAXIMUM_FUTURE_DAYS_ALLOWED = 30;
 
     private final ReservationRepository reservationRepository;
     private final RoomRepository roomRepository;
@@ -47,16 +50,20 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     public ReservationSuccessResponseDTO placeReservation(ReservationRequestDTO reservationRequest) {
-        validateReservationRequest(reservationRequest);
+        validateNewReservationRequest(reservationRequest);
 
         Reservation reservation = new Reservation();
         reservation.setStartDate(reservationRequest.getStartDate());
         reservation.setEndDate(reservationRequest.getEndDate());
         reservation.setStatus(ReservationStatusEnum.ACTIVE);
 
-        // TODO check for the existence of these before trying to set them
-        reservation.setRoom(roomRepository.getReferenceById(reservationRequest.getRoomId()));
-        reservation.setUser(userRepository.getReferenceById(reservationRequest.getUserId()));
+        Room room = roomRepository.findById(reservationRequest.getRoomId())
+                .orElseThrow(() -> new ReservationException("No room found with the provided id"));
+        reservation.setRoom(room);
+
+        User user = userRepository.findById(reservationRequest.getUserId())
+                .orElseThrow(() -> new ReservationException("No user found with the provided id"));
+        reservation.setUser(user);
 
         reservationRepository.save(reservation);
         return new ReservationSuccessResponseDTO(reservation);
@@ -65,10 +72,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationSuccessResponseDTO updateReservation(ReservationUpdateRequestDTO reservationUpdateRequest) {
         Reservation reservation = getReservation(reservationUpdateRequest.getReservationId());
-        validateReservationStatusIsActive(reservation.getStatus());
-        validateReservationDuration(reservationUpdateRequest.getStartDate(), reservationUpdateRequest.getEndDate());
-        validateReservationNotAfterMaximumAllowedStartDate(reservationUpdateRequest.getStartDate());
-        validateRoomNotReserved(reservationUpdateRequest.getStartDate(), reservation.getRoom().getId());
+        validateReservationUpdateRequest(reservationUpdateRequest, reservation);
 
         reservation.setStartDate(reservationUpdateRequest.getStartDate());
         reservation.setEndDate(reservationUpdateRequest.getEndDate());
@@ -88,19 +92,13 @@ public class ReservationServiceImpl implements ReservationService {
         reservationRepository.save(reservation);
     }
 
-    private static void validateReservationStatusIsActive(ReservationStatusEnum status) {
-        if (!ReservationStatusEnum.ACTIVE.equals(status)) {
-            throw new ReservationException("Reservation must be active");
-        }
-    }
-
     private Reservation getReservation(Long reservationId) {
         Optional<Reservation> reservationOpt = reservationRepository.findById(reservationId);
         return reservationOpt.orElseThrow(
                 () -> new ReservationException("No reservation found with the given id"));
     }
 
-    private void validateReservationRequest(ReservationRequestDTO reservationRequest) {
+    private void validateNewReservationRequest(ReservationRequestDTO reservationRequest) {
         LocalDate startDate = reservationRequest.getStartDate();
         LocalDate endDate = reservationRequest.getEndDate();
 
@@ -108,6 +106,19 @@ public class ReservationServiceImpl implements ReservationService {
         validateReservationDuration(startDate, endDate);
         validateReservationNotAfterMaximumAllowedStartDate(startDate);
         validateRoomNotReserved(startDate, reservationRequest.getRoomId());
+    }
+
+    private void validateReservationUpdateRequest(ReservationUpdateRequestDTO reservationUpdateRequest, Reservation reservation) {
+        validateReservationStatusIsActive(reservation.getStatus());
+        validateReservationDuration(reservationUpdateRequest.getStartDate(), reservationUpdateRequest.getEndDate());
+        validateReservationNotAfterMaximumAllowedStartDate(reservationUpdateRequest.getStartDate());
+        validateRoomNotReserved(reservationUpdateRequest.getStartDate(), reservation.getRoom().getId());
+    }
+
+    private static void validateReservationStatusIsActive(ReservationStatusEnum status) {
+        if (!ReservationStatusEnum.ACTIVE.equals(status)) {
+            throw new ReservationException("Reservation must be active");
+        }
     }
 
     private void validateRoomNotReserved(LocalDate startDate, Long roomId) {
@@ -119,7 +130,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     private void validateReservationNotAfterMaximumAllowedStartDate(LocalDate startDate) {
-        LocalDate limitDate = LocalDate.now(clock).plusDays(30); // TODO extract into constant
+        LocalDate limitDate = LocalDate.now(clock).plusDays(MAXIMUM_FUTURE_DAYS_ALLOWED);
         if (startDate.isAfter(limitDate)) {
             throw new ReservationException("Reservation cannot be more than 30 days into the future");
         }

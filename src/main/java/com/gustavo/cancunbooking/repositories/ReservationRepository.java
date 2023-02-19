@@ -19,7 +19,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Optional<Reservation> findReservationAtDateOrGreater(LocalDate date, Long roomId);
 
     @Query("Select r From Reservation r " +
-            "where r.id = :roomId " +
+            "where r.room.id = :roomId " +
             "and r.status = :status")
     Optional<Reservation> findByRoomIdAndStatus(Long roomId, ReservationStatusEnum status);
 }

@@ -3,6 +3,7 @@ package com.gustavo.cancunbooking.services;
 import com.gustavo.cancunbooking.model.Reservation;
 import com.gustavo.cancunbooking.model.ReservationStatusEnum;
 import com.gustavo.cancunbooking.repositories.ReservationRepository;
+import com.gustavo.cancunbooking.repositories.RoomRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,9 +24,12 @@ class RoomAvailabilityServiceImplTest {
     @Mock
     private ReservationRepository reservationRepository;
 
+    @Mock
+    private RoomRepository roomRepository;
+
     @BeforeEach
     public void setUp() {
-        roomAvailabilityService = new RoomAvailabilityServiceImpl(reservationRepository);
+        roomAvailabilityService = new RoomAvailabilityServiceImpl(reservationRepository, roomRepository);
     }
 
     @Test
@@ -48,7 +52,7 @@ class RoomAvailabilityServiceImplTest {
     }
 
     @Test
-    public void roomShouldBeAvailableIfNoReservationIsActive() {
+    public void roomShouldNotBeAvailableIfStartDateIsBeforeCurrentReservationEndDate() {
         // given
         LocalDate reservationEndDate = LocalDate.of(2023, 1, 10);
         Reservation reservation = createReservationMockResponse(reservationEndDate);
@@ -67,11 +71,12 @@ class RoomAvailabilityServiceImplTest {
     }
 
     @Test
-    public void roomShouldNotBeAvailableIfStartDateIsBeforeCurrentReservationEndDate() {
+    public void roomShouldBeAvailableIfNoReservationIsActive() {
         // given
         long roomId = 1L;
         given(reservationRepository.findByRoomIdAndStatus(roomId, ReservationStatusEnum.ACTIVE))
                 .willReturn(Optional.empty());
+        given(roomRepository.existsById(roomId)).willReturn(true);
 
         // when
         LocalDate dateToCheck = LocalDate.of(2023, 1, 9);

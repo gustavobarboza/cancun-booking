@@ -137,11 +137,11 @@ class ReservationServiceImplTest {
 
         var room = new Room();
         room.setId(1L);
-        given(roomRepository.getReferenceById(1L)).willReturn(room);
+        given(roomRepository.findById(1L)).willReturn(Optional.of(room));
 
         var user = new User();
         user.setId(1L);
-        given(userRepository.getReferenceById(1L)).willReturn(user);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
 
         // when
         ReservationSuccessResponseDTO actual = reservationService.placeReservation(request);
