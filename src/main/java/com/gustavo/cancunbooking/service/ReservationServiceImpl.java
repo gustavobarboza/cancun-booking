@@ -1,10 +1,9 @@
 package com.gustavo.cancunbooking.service;
 
 import com.gustavo.cancunbooking.controller.request.ReservationRequestDTO;
+import com.gustavo.cancunbooking.controller.request.ReservationUpdateRequestDTO;
 import com.gustavo.cancunbooking.controller.response.ReservationSuccessResponseDTO;
-import com.gustavo.cancunbooking.exception.ReservationAfterAllowedMaximumException;
-import com.gustavo.cancunbooking.exception.ReservationTooLongException;
-import com.gustavo.cancunbooking.exception.RoomAlreadyReservedException;
+import com.gustavo.cancunbooking.exception.*;
 import com.gustavo.cancunbooking.model.Reservation;
 import com.gustavo.cancunbooking.model.ReservationStatusEnum;
 import com.gustavo.cancunbooking.repository.ReservationRepository;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -58,8 +58,46 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setRoom(roomRepository.getReferenceById(reservationRequest.getRoomId()));
         reservation.setUser(userRepository.getReferenceById(reservationRequest.getUserId()));
 
-        reservation = reservationRepository.save(reservation);
+        reservationRepository.save(reservation);
         return new ReservationSuccessResponseDTO(reservation);
+    }
+
+    @Override
+    public ReservationSuccessResponseDTO updateReservation(ReservationUpdateRequestDTO reservationUpdateRequest) {
+        Reservation reservation = getReservation(reservationUpdateRequest.getReservationId());
+        validateReservationStatusIsActive(reservation.getStatus());
+        validateReservationDuration(reservationUpdateRequest.getStartDate(), reservationUpdateRequest.getEndDate());
+        validateReservationNotAfterMaximumAllowedStartDate(reservationUpdateRequest.getStartDate());
+        validateRoomNotReserved(reservationUpdateRequest.getStartDate(), reservation.getRoom().getId());
+
+        reservation.setStartDate(reservationUpdateRequest.getStartDate());
+        reservation.setEndDate(reservationUpdateRequest.getEndDate());
+
+        reservationRepository.save(reservation);
+        return new ReservationSuccessResponseDTO(reservation);
+    }
+
+    @Override
+    @Transactional
+    public void cancelReservation(Long reservationId) {
+        Reservation reservation = getReservation(reservationId);
+
+        validateReservationStatusIsActive(reservation.getStatus());
+
+        reservation.setStatus(ReservationStatusEnum.CANCELLED);
+        reservationRepository.save(reservation);
+    }
+
+    private static void validateReservationStatusIsActive(ReservationStatusEnum status) {
+        if (!ReservationStatusEnum.ACTIVE.equals(status)) {
+            throw new ReservationException("Reservation must be active");
+        }
+    }
+
+    private Reservation getReservation(Long reservationId) {
+        Optional<Reservation> reservationOpt = reservationRepository.findById(reservationId);
+        return reservationOpt.orElseThrow(
+                () -> new ReservationException("No reservation found with the given id"));
     }
 
     private void validateReservationRequest(ReservationRequestDTO reservationRequest) {
@@ -68,7 +106,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         validateStartDateNotAfterEndDate(startDate, endDate);
         validateReservationDuration(startDate, endDate);
-        validateReservationStartDateIsBeforeMaxAllowedDate(startDate);
+        validateReservationNotAfterMaximumAllowedStartDate(startDate);
         validateRoomNotReserved(startDate, reservationRequest.getRoomId());
     }
 
@@ -76,26 +114,26 @@ public class ReservationServiceImpl implements ReservationService {
         var roomAvailability = roomAvailabilityService.getRoomAvailability(startDate, roomId);
 
         if (!roomAvailability.isAvailable()) {
-           throw new RoomAlreadyReservedException();
+           throw new ReservationException("Room is already reserved in the provided period");
         }
     }
 
-    private void validateReservationStartDateIsBeforeMaxAllowedDate(LocalDate startDate) {
-        LocalDate limitDate = LocalDate.now(clock).plusDays(30);
+    private void validateReservationNotAfterMaximumAllowedStartDate(LocalDate startDate) {
+        LocalDate limitDate = LocalDate.now(clock).plusDays(30); // TODO extract into constant
         if (startDate.isAfter(limitDate)) {
-            throw new ReservationAfterAllowedMaximumException();
+            throw new ReservationException("Reservation cannot be more than 30 days into the future");
         }
     }
 
     private static void validateReservationDuration(LocalDate startDate, LocalDate endDate) {
         if (ChronoUnit.DAYS.between(startDate, endDate) >= MAXIMUM_RESERVATION_DAS_ALLOWED) {
-            throw new ReservationTooLongException();
+            throw new ReservationException("Reservation period cannot be greater than 3 days");
         }
     }
 
     private static void validateStartDateNotAfterEndDate(LocalDate startDate, LocalDate endDate) {
         if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("The start date cannot be after the end date");
+            throw new ReservationException("The start date cannot be after the end date");
         }
     }
 }
