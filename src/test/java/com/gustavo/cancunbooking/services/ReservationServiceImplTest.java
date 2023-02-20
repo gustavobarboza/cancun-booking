@@ -193,16 +193,16 @@ class ReservationServiceImplTest {
         ReservationUpdateRequestDTO reservationUpdateRequest = createReservationUpdateRequest(1L, null, null);
 
         // when
-        Throwable throwable = catchThrowable(() -> reservationService.updateReservation(reservationUpdateRequest));
+        Throwable thrown = catchThrowable(() -> reservationService.updateReservation(reservationUpdateRequest));
 
         // then
-        then(throwable).isInstanceOf(ReservationException.class).hasMessage("No reservation found with the given id");
+        then(thrown).isInstanceOf(ReservationException.class).hasMessage("No reservation found with the given id");
     }
 
     @Test
     public void shouldNotBeAbleToUpdateAReservationIfStartDateIsAfterEndDate() {
         // given
-        Reservation reservation = new Reservation();
+        var reservation = new Reservation();
         reservation.setStatus(ReservationStatusEnum.ACTIVE);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
@@ -220,7 +220,7 @@ class ReservationServiceImplTest {
     @Test
     public void shouldNotBeAbleToUpdateAReservationIfStartDateIsEqualEndDate() {
         // given
-        Reservation reservation = new Reservation();
+        var reservation = new Reservation();
         reservation.setStatus(ReservationStatusEnum.ACTIVE);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
@@ -243,7 +243,7 @@ class ReservationServiceImplTest {
 
         reservationService = new ReservationServiceImpl(reservationRepository, roomRepository, userRepository, roomAvailabilityService, fixedClock);
 
-        Reservation reservation = new Reservation();
+        var reservation = new Reservation();
         reservation.setStatus(ReservationStatusEnum.ACTIVE);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
@@ -258,26 +258,27 @@ class ReservationServiceImplTest {
         // then
         then(thrown).isInstanceOf(ReservationException.class).hasMessage("Reservation cannot start today");
     }
+
     @Test
     public void shouldNotBeAbleToUpdateAReservationIfItIsNotActive() {
         // given
-        Reservation reservation = new Reservation();
+        var reservation = new Reservation();
         reservation.setStatus(ReservationStatusEnum.FINISHED);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         ReservationUpdateRequestDTO reservationUpdateRequest = createReservationUpdateRequest(1L, null, null);
 
         //when
-        Throwable throwable = catchThrowable(() -> reservationService.updateReservation(reservationUpdateRequest));
+        Throwable thrown = catchThrowable(() -> reservationService.updateReservation(reservationUpdateRequest));
 
         //then
-        then(throwable).isInstanceOf(ReservationException.class).hasMessage("Reservation must be active");
+        then(thrown).isInstanceOf(ReservationException.class).hasMessage("Reservation must be active");
     }
 
     @Test
     public void shouldNotBeAbleToUpdateAReservationLWithAPeriodGreaterThanAllowed() {
         // given
-        Reservation reservation = new Reservation();
+        var reservation = new Reservation();
         reservation.setStatus(ReservationStatusEnum.ACTIVE);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
@@ -297,7 +298,6 @@ class ReservationServiceImplTest {
         Clock fixedClock = createFixedClock("2023-01-01T10:30:00.00Z");
 
         reservationService = new ReservationServiceImpl(reservationRepository, roomRepository, userRepository, roomAvailabilityService, fixedClock);
-
 
         Reservation reservation = new Reservation();
         reservation.setStatus(ReservationStatusEnum.ACTIVE);
@@ -366,7 +366,6 @@ class ReservationServiceImplTest {
         oldReservation.setUser(user);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(oldReservation));
 
-
         // when
         ReservationSuccessResponseDTO actual = reservationService.updateReservation(request);
 
@@ -383,9 +382,9 @@ class ReservationServiceImplTest {
         // given
         given(reservationRepository.findById(1L)).willReturn(Optional.empty());
         //when
-        Throwable throwable = catchThrowable(() -> reservationService.cancelReservation(1L));
+        Throwable thrown = catchThrowable(() -> reservationService.cancelReservation(1L));
         //then
-        then(throwable).isInstanceOf(ReservationException.class).hasMessage("No reservation found with the given id");
+        then(thrown).isInstanceOf(ReservationException.class).hasMessage("No reservation found with the given id");
     }
 
     @Test
@@ -396,10 +395,10 @@ class ReservationServiceImplTest {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         //when
-        Throwable throwable = catchThrowable(() -> reservationService.cancelReservation(1L));
+        Throwable thrown = catchThrowable(() -> reservationService.cancelReservation(1L));
 
         //then
-        then(throwable).isInstanceOf(ReservationException.class).hasMessage("Reservation must be active");
+        then(thrown).isInstanceOf(ReservationException.class).hasMessage("Reservation must be active");
     }
 
     @Test
