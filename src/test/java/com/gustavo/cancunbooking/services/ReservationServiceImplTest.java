@@ -63,11 +63,43 @@ class ReservationServiceImplTest {
         var endDate = LocalDate.of(2023, 1, 1);
         ReservationRequestDTO request = createReservationRequest(startDate, endDate);
 
-        //when
+        // when
         Throwable thrown = catchThrowable(() -> reservationService.placeReservation(request));
 
         // then
         then(thrown).isInstanceOf(ReservationException.class).hasMessage("The start date cannot be after the end date");
+    }
+
+    @Test
+    public void shouldNotBeAbleToPlaceAReservationIfStartDateIsEqualEndDate() {
+        // given
+        var date = LocalDate.of(2023, 1, 1);
+        ReservationRequestDTO reservationRequest = createReservationRequest(date, date);
+
+        // when
+        Throwable thrown = catchThrowable(() -> reservationService.placeReservation(reservationRequest));
+
+        // then
+        then(thrown).isInstanceOf(ReservationException.class).hasMessage("The start and end date cannot be the same");
+    }
+
+    @Test
+    public void shouldNotBeAbleToPlaceAReservationThatStartsToday() {
+        // given
+        var clockDateTime = "2023-01-01T10:30:00.00Z";
+        Clock fixedClock = createFixedClock(clockDateTime);
+
+        reservationService = new ReservationServiceImpl(reservationRepository, roomRepository, userRepository, roomAvailabilityService, fixedClock);
+
+        var startDate = LocalDate.of(2023, 1, 1);
+        var endDate = LocalDate.of(2023, 1, 3);
+        ReservationRequestDTO reservationRequest = createReservationRequest(startDate, endDate);
+
+        // when
+        Throwable thrown = catchThrowable(() -> reservationService.placeReservation(reservationRequest));
+
+        // then
+        then(thrown).isInstanceOf(ReservationException.class).hasMessage("Reservation cannot start today");
     }
 
     @Test
@@ -167,6 +199,65 @@ class ReservationServiceImplTest {
         then(throwable).isInstanceOf(ReservationException.class).hasMessage("No reservation found with the given id");
     }
 
+    @Test
+    public void shouldNotBeAbleToUpdateAReservationIfStartDateIsAfterEndDate() {
+        // given
+        Reservation reservation = new Reservation();
+        reservation.setStatus(ReservationStatusEnum.ACTIVE);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+
+        var startDate = LocalDate.of(2023, 1, 2);
+        var endDate = LocalDate.of(2023, 1, 1);
+        ReservationUpdateRequestDTO reservationUpdateRequest = createReservationUpdateRequest(1L, startDate, endDate);
+
+        // when
+        Throwable thrown = catchThrowable(() -> reservationService.updateReservation(reservationUpdateRequest));
+
+        // then
+        then(thrown).isInstanceOf(ReservationException.class).hasMessage("The start date cannot be after the end date");
+    }
+
+    @Test
+    public void shouldNotBeAbleToUpdateAReservationIfStartDateIsEqualEndDate() {
+        // given
+        Reservation reservation = new Reservation();
+        reservation.setStatus(ReservationStatusEnum.ACTIVE);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+
+        var startDate = LocalDate.of(2023, 1, 1);
+        var endDate = LocalDate.of(2023, 1, 1);
+        ReservationUpdateRequestDTO reservationUpdateRequest = createReservationUpdateRequest(1L, startDate, endDate);
+
+        // when
+        Throwable thrown = catchThrowable(() -> reservationService.updateReservation(reservationUpdateRequest));
+
+        // then
+        then(thrown).isInstanceOf(ReservationException.class).hasMessage("The start and end date cannot be the same");
+    }
+
+    @Test
+    public void shouldNotBeAbleToUpdateAReservationMakingItStartToday() {
+        // given
+        var clockDateTime = "2023-01-01T10:30:00.00Z";
+        Clock fixedClock = createFixedClock(clockDateTime);
+
+        reservationService = new ReservationServiceImpl(reservationRepository, roomRepository, userRepository, roomAvailabilityService, fixedClock);
+
+        Reservation reservation = new Reservation();
+        reservation.setStatus(ReservationStatusEnum.ACTIVE);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+
+
+        var startDate = LocalDate.of(2023, 1, 1);
+        var endDate = LocalDate.of(2023, 1, 3);
+        ReservationUpdateRequestDTO reservationUpdateRequest = createReservationUpdateRequest(1L, startDate, endDate);
+
+        // when
+        Throwable thrown = catchThrowable(() -> reservationService.updateReservation(reservationUpdateRequest));
+
+        // then
+        then(thrown).isInstanceOf(ReservationException.class).hasMessage("Reservation cannot start today");
+    }
     @Test
     public void shouldNotBeAbleToUpdateAReservationIfItIsNotActive() {
         // given

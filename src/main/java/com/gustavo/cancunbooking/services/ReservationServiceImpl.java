@@ -102,6 +102,8 @@ public class ReservationServiceImpl implements ReservationService {
         LocalDate startDate = reservationRequest.getStartDate();
         LocalDate endDate = reservationRequest.getEndDate();
 
+        validateStartDateAndEndDateAreNotEqual(startDate, endDate);
+        validateStartDateNotToday(startDate);
         validateStartDateNotAfterEndDate(startDate, endDate);
         validateReservationDuration(startDate, endDate);
         validateReservationNotAfterMaximumAllowedStartDate(startDate);
@@ -110,9 +112,16 @@ public class ReservationServiceImpl implements ReservationService {
 
     private void validateReservationUpdateRequest(ReservationUpdateRequestDTO reservationUpdateRequest, Reservation reservation) {
         validateReservationStatusIsActive(reservation.getStatus());
-        validateReservationDuration(reservationUpdateRequest.getStartDate(), reservationUpdateRequest.getEndDate());
-        validateReservationNotAfterMaximumAllowedStartDate(reservationUpdateRequest.getStartDate());
-        validateRoomNotReserved(reservationUpdateRequest.getStartDate(), reservation.getRoom().getId());
+
+        LocalDate updateRequestStartDate = reservationUpdateRequest.getStartDate();
+        LocalDate updateRequestEndDate = reservationUpdateRequest.getEndDate();
+
+        validateStartDateAndEndDateAreNotEqual(updateRequestStartDate, updateRequestEndDate);
+        validateStartDateNotToday(updateRequestStartDate);
+        validateStartDateNotAfterEndDate(updateRequestStartDate, updateRequestEndDate);
+        validateReservationDuration(updateRequestStartDate, updateRequestEndDate);
+        validateReservationNotAfterMaximumAllowedStartDate(updateRequestStartDate);
+        validateRoomNotReserved(updateRequestStartDate, reservation.getRoom().getId());
     }
 
     private static void validateReservationStatusIsActive(ReservationStatusEnum status) {
@@ -145,6 +154,18 @@ public class ReservationServiceImpl implements ReservationService {
     private static void validateStartDateNotAfterEndDate(LocalDate startDate, LocalDate endDate) {
         if (startDate.isAfter(endDate)) {
             throw new ReservationException("The start date cannot be after the end date");
+        }
+    }
+
+    private void validateStartDateAndEndDateAreNotEqual(LocalDate startDate, LocalDate endDate) {
+        if (startDate.equals(endDate)) {
+            throw new ReservationException("The start and end date cannot be the same");
+        }
+    }
+
+    private void validateStartDateNotToday(LocalDate startDate) {
+        if (LocalDate.now(clock).isEqual(startDate)) {
+            throw new ReservationException("Reservation cannot start today");
         }
     }
 }
