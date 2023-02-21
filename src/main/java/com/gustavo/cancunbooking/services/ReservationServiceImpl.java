@@ -70,6 +70,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Transactional
     public ReservationSuccessResponseDTO updateReservation(ReservationUpdateRequestDTO reservationUpdateRequest) {
         Reservation reservation = getReservation(reservationUpdateRequest.getReservationId());
         validateReservationUpdateRequest(reservationUpdateRequest, reservation);
