@@ -22,5 +22,6 @@ Set the following environment varibles:
 - DATABASE_USER - the database connection user;
 - DATABASE_PASSWORD - the database connection password.
 
-Either start the application with a IDE of choice or package it with **mvn clean package** and start the generated .jar executable with **java -jar <app_name>.jar**
+Either start the application with a IDE of choice or package it with **mvn clean package** and start the generated .jar executable with **java -jar <app_name>.jar**.
+
 The application will be initialized with a default user and room as defined in **src/main/resources/data.sql**.
