@@ -84,25 +84,6 @@ class ReservationServiceImplTest {
     }
 
     @Test
-    public void shouldNotBeAbleToPlaceAReservationThatStartsToday() {
-        // given
-        var clockDateTime = "2023-01-01T10:30:00.00Z";
-        Clock fixedClock = createFixedClock(clockDateTime);
-
-        reservationService = new ReservationServiceImpl(reservationRepository, roomRepository, userRepository, roomAvailabilityService, fixedClock);
-
-        var startDate = LocalDate.of(2023, 1, 1);
-        var endDate = LocalDate.of(2023, 1, 3);
-        ReservationRequestDTO reservationRequest = createReservationRequest(startDate, endDate);
-
-        // when
-        Throwable thrown = catchThrowable(() -> reservationService.placeReservation(reservationRequest));
-
-        // then
-        then(thrown).isInstanceOf(ReservationException.class).hasMessage("Reservation cannot start today");
-    }
-
-    @Test
     public void shouldNotBeAbleToPlaceAReservationLongerThanThreeDays() {
         // given
         var startDate = LocalDate.of(2023, 1, 1);
@@ -233,30 +214,6 @@ class ReservationServiceImplTest {
 
         // then
         then(thrown).isInstanceOf(ReservationException.class).hasMessage("The start and end date cannot be the same");
-    }
-
-    @Test
-    public void shouldNotBeAbleToUpdateAReservationMakingItStartToday() {
-        // given
-        var clockDateTime = "2023-01-01T10:30:00.00Z";
-        Clock fixedClock = createFixedClock(clockDateTime);
-
-        reservationService = new ReservationServiceImpl(reservationRepository, roomRepository, userRepository, roomAvailabilityService, fixedClock);
-
-        var reservation = new Reservation();
-        reservation.setStatus(ReservationStatusEnum.ACTIVE);
-        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-
-
-        var startDate = LocalDate.of(2023, 1, 1);
-        var endDate = LocalDate.of(2023, 1, 3);
-        ReservationUpdateRequestDTO reservationUpdateRequest = createReservationUpdateRequest(1L, startDate, endDate);
-
-        // when
-        Throwable thrown = catchThrowable(() -> reservationService.updateReservation(reservationUpdateRequest));
-
-        // then
-        then(thrown).isInstanceOf(ReservationException.class).hasMessage("Reservation cannot start today");
     }
 
     @Test

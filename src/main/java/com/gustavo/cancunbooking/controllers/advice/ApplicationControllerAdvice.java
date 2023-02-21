@@ -8,28 +8,32 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @ControllerAdvice
 public class ApplicationControllerAdvice {
 
     @ExceptionHandler(ReservationException.class)
-    public ResponseEntity<ErrorWrapper> handleReservationException(ReservationException ex) {
-        return ResponseEntity.badRequest().body(new ErrorWrapper(ex.getMessage()));
+    public ResponseEntity<ErrorMessage> handleReservationException(ReservationException ex) {
+        return ResponseEntity.badRequest().body(new ErrorMessage(ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidArgumentsException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorList> handleInvalidArgumentsException(MethodArgumentNotValidException ex) {
 
-        Map<String, String> errors = new HashMap<>();
+        List<ErrorField> errors = new ArrayList<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
-            errors.put(((FieldError)error).getField(), error.getDefaultMessage());
+            String field = ((FieldError) error).getField();
+            String message = error.getDefaultMessage();
+            errors.add(new ErrorField(field, message));
         });
 
-        return ResponseEntity.badRequest().body(errors);
+        return ResponseEntity.badRequest().body(new ErrorList(errors));
     }
 }
 
-record ErrorWrapper(String errorMessage) { }
+record ErrorMessage(String errorMessage) { }
+
+record ErrorField(String field, String message) {}
+
+record ErrorList(List<ErrorField> errors) {}

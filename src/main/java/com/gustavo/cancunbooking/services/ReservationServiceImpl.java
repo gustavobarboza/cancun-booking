@@ -103,7 +103,6 @@ public class ReservationServiceImpl implements ReservationService {
         LocalDate endDate = reservationRequest.getEndDate();
 
         validateStartDateAndEndDateAreNotEqual(startDate, endDate);
-        validateStartDateNotToday(startDate);
         validateStartDateNotAfterEndDate(startDate, endDate);
         validateReservationDuration(startDate, endDate);
         validateReservationNotAfterMaximumAllowedStartDate(startDate);
@@ -117,7 +116,6 @@ public class ReservationServiceImpl implements ReservationService {
         LocalDate updateRequestEndDate = reservationUpdateRequest.getEndDate();
 
         validateStartDateAndEndDateAreNotEqual(updateRequestStartDate, updateRequestEndDate);
-        validateStartDateNotToday(updateRequestStartDate);
         validateStartDateNotAfterEndDate(updateRequestStartDate, updateRequestEndDate);
         validateReservationDuration(updateRequestStartDate, updateRequestEndDate);
         validateReservationNotAfterMaximumAllowedStartDate(updateRequestStartDate);
