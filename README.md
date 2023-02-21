@@ -5,6 +5,7 @@ Project created used spring boot to simulate a hotel booking API.
 - **Java 17**;
 - **Maven** as the build tool;
 - **Lombok** to avoid the needed java boilerplate;
+- **Spring Doc OpenAPI** to make it easier to view and try out the http endpoints.
 - **Spring MVC** to handle http requests;
 - **Spring Data JPA** to handle database interactions;
 - **Bean Validation** to validate incoming requests payload;
@@ -21,4 +22,5 @@ Set the following environment varibles:
 - DATABASE_USER - the database connection user;
 - DATABASE_PASSWORD - the database connection password.
 
-Either start the application with a IDE of choice or package it with **mvn clean package** and start the generated .jar app with **java -jar <app_name>.jar**
+Either start the application with a IDE of choice or package it with **mvn clean package** and start the generated .jar executable with **java -jar <app_name>.jar**
+The application will be initialized with a default user and room as defined in **src/main/resources/data.sql**.
